@@ -1,6 +1,7 @@
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const fs = require("fs");
+const express = require("express");
 require("dotenv").config();
 
 const streamUrl = process.env.STREAM_URL;
@@ -11,6 +12,13 @@ if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir);
 }
 
+const app = express();
+const port = 4000;
+
+// Serve static files from the output directory
+app.use("/clips", express.static(outputDir));
+
+// Start the recording loop
 function getTimestamp() {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
@@ -40,4 +48,11 @@ function recordStream() {
     .save(outputFilePath);
 }
 
+// Start recording
 recordStream();
+
+// Start the Express server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Serving clips from: ${outputDir}`);
+});
