@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { RxHamburgerMenu } from 'react-icons/rx';
@@ -13,7 +12,7 @@ export default function Home() {
       <video className="absolute top-1/2 left-1/2 w-auto h-auto min-w-full min-h-full max-w-none transform -translate-x-1/2 -translate-y-1/2 filter brightness-[30%]" autoPlay muted playsInline loop src="/video.mp4"/>
       <div className="absolute top-0 w-full z-10">
         <div className="relative z-20 mx-auto mt-5 flex justify-between items-center max-w-screen-lg px-2">
-          <Image src='/logo.png' width={50} height={50} alt="logo" />
+          <img src='/logo.png' width={50} height={50} alt="logo" />
           <RxHamburgerMenu onClick={() => setMenuOpen(!menuOpen)} color="white" size={24}/>
         </div>
         {menuOpen && (
