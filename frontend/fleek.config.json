@@ -1,0 +1,9 @@
+{
+  "sites": [
+    {
+      "slug": "crashing-disease-round",
+      "distDir": "out",
+      "buildCommand": "npm run build"
+    }
+  ]
+}
