@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { RxHamburgerMenu } from 'react-icons/rx';
 
@@ -40,7 +41,9 @@ export default function Home() {
           <select className="px-4 py-2 bg-white text-black rounded">
             <option>Elegí el horario</option>
           </select>
-          <button className="px-6 py-2 bg-orange-500 text-white rounded">VER VIDEO</button>
+          <Link href='/live'>
+            <button className="px-6 py-2 bg-orange-500 text-white rounded">VER VIDEO</button>
+          </Link>
         </div>
       </div>
     </main>
