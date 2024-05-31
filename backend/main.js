@@ -30,7 +30,9 @@ function getTimestamp() {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
 
-function recordStream() {
+let id = 1;
+
+function recordStream(retryCount = 0) {
   const timestamp = getTimestamp();
   const outputFilePath = path.join(outputDir, `stream_${timestamp}.mp4`);
 
@@ -43,22 +45,28 @@ function recordStream() {
       "-preset fast", // Preset for encoding speed vs compression
       "-c:a aac", // Encode audio to AAC
       "-b:a 128k", // Audio bitrate
-      "-t 10", // Record only 10 seconds for testing (adjust as needed)
+      "-t 3", // Record only 60 seconds for testing (adjust as needed)
     ])
     .on("end", () => {
       console.log("Recording ended.");
       cloudinary.uploader.upload(
         outputFilePath,
-        { public_id: "olympic_flag", resource_type: "video" },
+        { public_id: id, resource_type: "video" },
         function (error, result) {
-          console.log(result);
-          console.log(error);
+          if (error) {
+            console.log("an error occured");
+            console.log(error);
+          } else {
+            if (result.audio) {
+              console.log(result.playback_url);
+            } else {
+              console.log("camera not working, retrying");
+            }
+          }
         }
       );
-      setTimeout(recordStream, 0); // Start recording the next segment immediately
-    })
-    .on("error", (err) => {
-      console.error("Error occurred: " + err.message);
+      id += 1;
+      setTimeout(() => recordStream(0), 0); // Start recording the next segment immediately
     })
     .save(outputFilePath);
 }
