@@ -3,6 +3,8 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const { v2: cloudinary } = require("cloudinary");
+const { FleekSdk, PersonalAccessTokenService } = require("@fleekxyz/sdk");
+
 require("dotenv").config();
 
 const streamUrl = process.env.STREAM_URL;
@@ -13,6 +15,13 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const patService = new PersonalAccessTokenService({
+  personalAccessToken: process.env.FLEEK_PAT,
+  projectId: process.env.FLEEK_PROJECT_ID, // Optional
+});
+
+const fleekSdk = new FleekSdk({ accessTokenService: patService });
 
 // Create the output directory if it doesn't exist
 if (!fs.existsSync(outputDir)) {
@@ -45,20 +54,24 @@ function recordStream(retryCount = 0) {
       "-preset fast", // Preset for encoding speed vs compression
       "-c:a aac", // Encode audio to AAC
       "-b:a 128k", // Audio bitrate
-      "-t 3", // Record only 60 seconds for testing (adjust as needed)
+      "-t 600", // Record only 60 seconds for testing (adjust as needed)
     ])
     .on("end", () => {
       console.log("Recording ended.");
       cloudinary.uploader.upload(
         outputFilePath,
         { public_id: id, resource_type: "video" },
-        function (error, result) {
+        async (error, result) => {
           if (error) {
             console.log("an error occured");
             console.log(error);
           } else {
             if (result.audio) {
               console.log(result.playback_url);
+              const resultFleek = await fleekSdk
+                .ipfs()
+                .addFromPath(outputFilePath);
+              console.log(resultFleek);
             } else {
               console.log("camera not working, retrying");
             }

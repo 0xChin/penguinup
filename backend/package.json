@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fleekxyz/sdk": "^1.4.2",
     "cloudinary": "^2.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
