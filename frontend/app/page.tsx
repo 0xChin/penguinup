@@ -99,27 +99,27 @@ export default function Home() {
           </select>
           <select className="px-4 py-2 bg-white text-black rounded" value={selectedTime} onChange={handleTimeChange}>
             <option value="">Choose the time</option>
-            <option value="17:30-18:00">17:30-18:00</option>
+            <option value="bafybeibycyo4e7winw7nfrtlla76ebhcpmxfuc2gubayrba7k4mlwodasq">19:05-19:10</option>
+            <option value="bafybeiatopcdkv37xptyinsprzmr6cd2zgp7imjomta7m3zwkxeymzleda">18:55-19:05</option>
+            <option value="bafybeiatopcdkv37xptyinsprzmr6cd2zgp7imjomta7m3zwkxeymzleda">18:45-18:55</option>
+            <option value="bafybeievxo3rvs4gljqlcy6apqfx63r6247wtgd7txwmpu5q5p6x6d6qn4">18:35-18:45</option>
+            <option value="bafybeiehuub467s6ptiat7vdr4xt2465iwnmld45kzs2ldeqdxjww5dwvm">18:00-18:10</option>
+            <option value="bafybeibsms3nby3g4l2gdw6eq7nf6p5fwppfzoexetn4axt4ftsry56w44">17:50-18:00</option>
+            <option value="bafybeiam5b4cfdvnxxsl2nmcnpsqmedcibmcxqwd7vllygiwjgoqdpixz4">17:40-17:50</option>
+            <option value="bafybeiajadn2ynkjheibrdamstfh2az7pplxxselouvu2fhz4uq4pjlpjy">17:30-17:40</option>
           </select>
         </div>
         <div className="mt-4 flex flex-wrap justify-center gap-4">
           <Link href={{
             pathname: '/replay',
-     /*        query: {
-              club: selectedClub,
-              field: selectedField,
-              date: selectedDate,
-              time: selectedTime,
-            } */
+             query: {
+              cid: selectedTime,
+            } 
           }}>
             <button className="px-6 py-2 bg-orange-500 text-white rounded disabled:opacity-50" disabled={!selectedClub || !selectedField || !selectedDate || !selectedTime}>WATCH VIDEO</button>
           </Link>
           <Link href={{
-            pathname: '/live',
-      /*       query: {
-              club: selectedClub,
-              field: selectedField,
-            } */
+            pathname: '/live'
           }}>
             <button className="px-6 py-2 bg-green-500 text-white rounded disabled:opacity-50" disabled={!selectedClub || !selectedField}>WATCH LIVE</button>
           </Link>
