@@ -7,9 +7,30 @@ import { SquidWidget } from "@0xsquid/widget";
 export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [language, setLanguage] = useState<"en" | "es">("en"); // Default language is English
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isWidgetVisible, setIsWidgetVisible] = useState(false);
+  const [clubName, setClubName] = useState("");
+  const [cameraUrls, setCameraUrls] = useState<string[]>([""]);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "es" : "en");
+  };
+
+  const handleAddCamera = () => {
+    setCameraUrls([...cameraUrls, ""]);
+  };
+
+  const handleCameraUrlChange = (index: number, value: string) => {
+    const newCameraUrls = [...cameraUrls];
+    newCameraUrls[index] = value;
+    setCameraUrls(newCameraUrls);
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    // Here you would handle creating the club with the entered details
+    setIsFormVisible(false);
+    setIsWidgetVisible(true);
   };
 
   const texts = {
@@ -18,14 +39,22 @@ export default function Dashboard() {
       subtitle: "Register your club",
       addClub: "Add Club",
       watchReplays: "Watch replays",
-      penguinupOnYourClub: "Penguinup on your club"
+      penguinupOnYourClub: "Penguinup on your club",
+      clubName: "Club Name",
+      cameraHls: "Camera HLS URL",
+      addCamera: "Add Camera",
+      submit: "Submit"
     },
     es: {
       title: "Penguinup en tu club",
       subtitle: "Registra tu club",
       addClub: "Agregar Club",
       watchReplays: "Ver repeticiones",
-      penguinupOnYourClub: "Penguinup en tu club"
+      penguinupOnYourClub: "Penguinup en tu club",
+      clubName: "Nombre del Club",
+      cameraHls: "URL HLS de la Cámara",
+      addCamera: "Agregar Cámara",
+      submit: "Enviar"
     }
   };
 
@@ -53,27 +82,64 @@ export default function Dashboard() {
         <h1 className="text-white text-4xl md:text-6xl font-bold">{t.title}</h1>
         <p className="text-white text-lg md:text-2xl mt-4">{t.subtitle}</p>
         <div className="mt-8">
-          <button className="px-6 py-2 bg-blue-500 text-white rounded">{t.addClub}</button>
+          {!isFormVisible && (
+            <button onClick={() => setIsFormVisible(true)} className="px-6 py-2 bg-blue-500 text-white rounded">{t.addClub}</button>
+          )}
         </div>
       </div>
 
-        <div className="flex justify-center">
-            <SquidWidget config={{
-            companyName: "Squid Widget",
-            slippage: 1,
-            infiniteApproval: false,
-            defaultTokens: [ { chainId: 10, address: "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1" } ],
-            initialFromChainId: "137",
-            initialToChainId: "10",
-            internalSameChainSwapAllowed: true,
-            availableChains: {
-            destination: [ "10" ],
-            },
-            apiUrl: "https://v2.api.squidrouter.com",
-            preferDex: [ "QUICKSWAP" ],
-            integratorId: "penguinup-cd191dc7-04ee-456c-8533-55d0c5aaa5dc",
-        }} />
+      {isFormVisible && (
+        <div className="absolute z-20 top-1/4 w-3/4 bg-white p-6 rounded-lg shadow-lg">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">{t.clubName}</label>
+              <input
+                type="text"
+                value={clubName}
+                onChange={(e) => setClubName(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                required
+              />
+            </div>
+            {cameraUrls.map((url, index) => (
+              <div className="mb-4" key={index}>
+                <label className="block text-gray-700 text-sm font-bold mb-2">{`${t.cameraHls} ${index + 1}`}</label>
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => handleCameraUrlChange(index, e.target.value)}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
+            ))}
+            <button type="button" onClick={handleAddCamera} className="px-4 py-2 bg-green-500 text-white rounded mb-4">{t.addCamera}</button>
+            <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded">{t.submit}</button>
+          </form>
         </div>
+      )}
+
+      {isWidgetVisible && (
+        <div className="flex justify-center">
+          <SquidWidget
+            config={{
+              companyName: "Squid Widget",
+              slippage: 1,
+              infiniteApproval: false,
+              defaultTokens: [{ chainId: 10, address: "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1" }],
+              initialFromChainId: "137",
+              initialToChainId: "10",
+              internalSameChainSwapAllowed: true,
+              availableChains: {
+                destination: ["10"],
+              },
+              apiUrl: "https://v2.api.squidrouter.com",
+              preferDex: ["QUICKSWAP"],
+              integratorId: "penguinup-cd191dc7-04ee-456c-8533-55d0c5aaa5dc",
+            }}
+          />
+        </div>
+      )}
     </main>
   );
 }
