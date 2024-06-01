@@ -16,6 +16,7 @@ export default function Home() {
   const [selectedField, setSelectedField] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [language, setLanguage] = useState<"en" | "es">("en"); // Default language is English
 
   useEffect(() => {
     const generateDateOptions = () => {
@@ -62,43 +63,77 @@ export default function Home() {
     setSelectedTime(event.target.value);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
+
+  const texts = {
+    en: {
+      title: "REPLAY YOUR GAME",
+      subtitle: "Find your best plays and share them with your friends",
+      chooseClub: "Choose the club",
+      chooseField: "Choose the field",
+      chooseDate: "Choose the date",
+      chooseTime: "Choose the time",
+      watchVideo: "WATCH VIDEO",
+      watchLive: "WATCH LIVE",
+      watchReplays: "Watch replays",
+      penguinupOnYourClub: "Penguinup on your club"
+    },
+    es: {
+      title: "REVIVÍ TU PARTIDO",
+      subtitle: "Encontrá tus mejores jugadas y compartilas con tus amigos",
+      chooseClub: "Elegí el club",
+      chooseField: "Elegí la cancha",
+      chooseDate: "Elegí la fecha",
+      chooseTime: "Elegí el horario",
+      watchVideo: "VER VIDEO",
+      watchLive: "VER EN VIVO",
+      watchReplays: "Ver repeticiones",
+      penguinupOnYourClub: "Penguinup en tu club"
+    }
+  };
+
+  const t = texts[language];
+
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-between p-4 md:p-24 overflow-hidden">
       <video className="absolute top-1/2 left-1/2 w-auto h-auto min-w-full min-h-full max-w-none transform -translate-x-1/2 -translate-y-1/2 filter brightness-[30%]" autoPlay muted playsInline loop src="/video.mp4"/>
       <div className="absolute top-0 w-full z-10">
         <div className="relative z-20 mx-auto mt-5 flex justify-between items-center max-w-screen-lg px-2">
           <img src='/logo.png' width={50} height={50} alt="logo" />
+          <button onClick={toggleLanguage} className="text-white">{language === "en" ? "ES" : "EN"}</button>
           <RxHamburgerMenu onClick={() => setMenuOpen(!menuOpen)} color="white" size={24}/>
         </div>
         {menuOpen && (
           <div className="mx-auto absolute top-0 right-0 w-full min-h-screen bg-black opacity-70 rounded shadow-lg">
             <ul className="max-w-screen-lg mx-auto mt-20 flex flex-col items-end space-y-4 p-6 text-white">
-              <li><a href="/">Watch replays</a></li>
-              <li><a href="/dashboard">Penguinup on your club</a></li>
+              <li><a href="/">{t.watchReplays}</a></li>
+              <li><a href="/dashboard">{t.penguinupOnYourClub}</a></li>
             </ul>
           </div>
         )}
       </div>
       <div className={`${menuOpen && 'opacity-10'} relative z-10 flex flex-col items-center justify-center text-center mt-20 md:mt-40`}>
-        <h1 className="text-white text-4xl md:text-6xl font-bold">REPLAY YOUR GAME</h1>
-        <p className="text-white text-lg md:text-2xl mt-4">Find your best plays and share them with your friends</p>
+        <h1 className="text-white text-4xl md:text-6xl font-bold">{t.title}</h1>
+        <p className="text-white text-lg md:text-2xl mt-4">{t.subtitle}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <select className="px-4 py-2 bg-white text-black rounded" value={selectedClub} onChange={handleClubChange}>
-            <option value="">Choose the club</option>
+            <option value="">{t.chooseClub}</option>
             <option value="SET PADEL HOUSE">SET PADEL HOUSE</option>
           </select>
           <select className="px-4 py-2 bg-white text-black rounded" value={selectedField} onChange={handleFieldChange}>
-            <option value="">Choose the field</option>
+            <option value="">{t.chooseField}</option>
             <option value="PADEL 1">PADEL 1</option>
           </select>
           <select className="px-4 py-2 bg-white text-black rounded" value={selectedDate} onChange={handleDateChange}>
-            <option value="">Choose the date</option>
+            <option value="">{t.chooseDate}</option>
             {dateOptions.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
           <select className="px-4 py-2 bg-white text-black rounded" value={selectedTime} onChange={handleTimeChange}>
-            <option value="">Choose the time</option>
+            <option value="">{t.chooseTime}</option>
             <option value="bafybeibycyo4e7winw7nfrtlla76ebhcpmxfuc2gubayrba7k4mlwodasq">19:05-19:10</option>
             <option value="bafybeiatopcdkv37xptyinsprzmr6cd2zgp7imjomta7m3zwkxeymzleda">18:55-19:05</option>
             <option value="bafybeiatopcdkv37xptyinsprzmr6cd2zgp7imjomta7m3zwkxeymzleda">18:45-18:55</option>
@@ -116,12 +151,12 @@ export default function Home() {
               cid: selectedTime,
             } 
           }}>
-            <button className="px-6 py-2 bg-orange-500 text-white rounded disabled:opacity-50" disabled={!selectedClub || !selectedField || !selectedDate || !selectedTime}>WATCH VIDEO</button>
+            <button className="px-6 py-2 bg-orange-500 text-white rounded disabled:opacity-50" disabled={!selectedClub || !selectedField || !selectedDate || !selectedTime}>{t.watchVideo}</button>
           </Link>
           <Link href={{
             pathname: '/live'
           }}>
-            <button className="px-6 py-2 bg-green-500 text-white rounded disabled:opacity-50" disabled={!selectedClub || !selectedField}>WATCH LIVE</button>
+            <button className="px-6 py-2 bg-green-500 text-white rounded disabled:opacity-50" disabled={!selectedClub || !selectedField}>{t.watchLive}</button>
           </Link>
         </div>
       </div>
