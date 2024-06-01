@@ -28,7 +28,7 @@ export default function Dashboard() {
     }
 
     const updateDai = async () => {
-        if (localStorage.getItem('to')) {
+        if (clubInfo?.contractAddress) {
             setDai(await getDai())
         }
     }
@@ -41,14 +41,14 @@ export default function Dashboard() {
         address: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
         abi: erc20Abi,
         functionName: 'balanceOf',
-        args: [localStorage.getItem('to') as `0x${string}`]
+        args: [clubInfo?.contractAddress as `0x${string}`]
       })
 
       return Number(data)
   }
 
   const updateDai = async () => {
-    if (localStorage.getItem('to')) {
+    if (clubInfo?.contractAddress) {
         setDai(await getDai())
     }
 }
@@ -97,9 +97,6 @@ export default function Dashboard() {
     const club = localStorage.getItem('club');
     if (club) {
       const parsedClub = JSON.parse(club);
-      if (parsedClub.contractAddress) {
-        localStorage.setItem('to', parsedClub.contractAddress);
-      }
     }
     setIsWidgetVisible(true);
   };
@@ -175,7 +172,7 @@ export default function Dashboard() {
               <h2 className="text-xl font-bold mb-2">{clubInfo.clubName}</h2>
               <ul>
                 <li className="text-gray-700">{t.cameras}: 1</li>
-                <li className="text-gray-700">Address: {localStorage.getItem('to')}</li>
+                <li className="text-gray-700">Address: {clubInfo.contractAddress}</li>
                 <li className="text-gray-700">{t.funds}: {(dai / 10 ** 18).toFixed(2)} DAI</li>
                 <li className="text-gray-700">{t.remainingTime}: {(dai / 10 ** 18 * 1.5).toFixed(2)} {t.days}</li>
               </ul>
@@ -187,7 +184,7 @@ export default function Dashboard() {
         {isWidgetVisible && <ol className="bg-white w-full">
             <li>1. Choose any token on any chain to send</li>
             <li>{"2. Don't change the receiver token on chain (DAI on Optimism)"}</li>
-            <li>{`3. Set the "to address" as ${localStorage.getItem('to')}`}</li>
+            <li>{`3. Set the "to address" as ${clubInfo?.contractAddress}`}</li>
       </ol>}
       </div>
 
