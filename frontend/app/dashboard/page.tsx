@@ -1,16 +1,57 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RxHamburgerMenu } from 'react-icons/rx';
 import { SquidWidget } from "@0xsquid/widget";
+import { createPublicClient, erc20Abi, http } from "viem";
+import { optimism } from "viem/chains";
 
 export default function Dashboard() {
+    const publicClient = createPublicClient({
+        chain: optimism,
+        transport: http("https://optimism.llamarpc.com"),
+      });
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [language, setLanguage] = useState<"en" | "es">("en"); // Default language is English
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [clubName, setClubName] = useState("");
   const [cameraUrls, setCameraUrls] = useState<string[]>([""]);
+  const [clubInfo, setClubInfo] = useState<{ clubName: string, cameraUrls: string[], contractAddress: string } | null>(null);
+  const [dai, setDai] = useState(0)
+
+  useEffect(() => {
+    const storedClub = localStorage.getItem('club');
+    if (storedClub) {
+      setClubInfo(JSON.parse(storedClub));
+    }
+
+    const updateDai = async () => {
+        if (localStorage.getItem('to')) {
+            setDai(await getDai())
+        }
+    }
+
+    updateDai()
+  }, []);
+
+  const getDai = async (): Promise<number> => {
+    const data = await publicClient.readContract({
+        address: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [localStorage.getItem('to') as `0x${string}`]
+      })
+
+      return Number(data)
+  }
+
+  const updateDai = async () => {
+    if (localStorage.getItem('to')) {
+        setDai(await getDai())
+    }
+}
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "es" : "en");
@@ -26,10 +67,40 @@ export default function Dashboard() {
     setCameraUrls(newCameraUrls);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     // Here you would handle creating the club with the entered details
-    setIsFormVisible(false);
+    const response = await fetch('https://penguinup.vercel.app/api/club');
+    const data = await response.json();
+    if (data.result) {
+      const newClubInfo = {
+        clubName,
+        cameraUrls,
+        contractAddress: data.result,
+      };
+      localStorage.setItem('club', JSON.stringify(newClubInfo));
+      setClubInfo(newClubInfo);
+      setIsFormVisible(false);
+    } else {
+      console.error('Failed to create club:', data.error);
+    }
+  };
+
+  const handleRefresh = () => updateDai();
+
+  const handleRemoveClub = () => {
+    localStorage.removeItem('club');
+    setClubInfo(null);
+  };
+
+  const handleAddFunds = () => {
+    const club = localStorage.getItem('club');
+    if (club) {
+      const parsedClub = JSON.parse(club);
+      if (parsedClub.contractAddress) {
+        localStorage.setItem('to', parsedClub.contractAddress);
+      }
+    }
     setIsWidgetVisible(true);
   };
 
@@ -37,24 +108,38 @@ export default function Dashboard() {
     en: {
       title: "Penguinup on your club",
       subtitle: "Register your club",
+      cameras: "Cameras",
+      funds: "Funds",
       addClub: "Add Club",
       watchReplays: "Watch replays",
       penguinupOnYourClub: "Penguinup on your club",
       clubName: "Club Name",
       cameraHls: "Camera HLS URL",
       addCamera: "Add Camera",
-      submit: "Submit"
+      submit: "Submit",
+      removeClub: "Remove Club",
+      remainingTime: "Remaining Time",
+      days: "Days",
+      addFunds: "Add Funds",
+      refreshFunds: "Refresh Funds"
     },
     es: {
       title: "Penguinup en tu club",
       subtitle: "Registra tu club",
+      cameras: "Camaras",
+      funds: "Fondos",
       addClub: "Agregar Club",
       watchReplays: "Ver repeticiones",
       penguinupOnYourClub: "Penguinup en tu club",
       clubName: "Nombre del Club",
       cameraHls: "URL HLS de la Cámara",
       addCamera: "Agregar Cámara",
-      submit: "Enviar"
+      submit: "Enviar",
+      remainingTime: "Tiempo restante",
+      days: "Dias",
+      removeClub: "Eliminar Club",
+      addFunds: "Agregar Fondos",
+      refreshFunds: "Actualizar fondos"
     }
   };
 
@@ -81,12 +166,31 @@ export default function Dashboard() {
       <div className={`${menuOpen && 'opacity-10'} relative z-10 flex flex-col items-center justify-center text-center mt-20 md:mt-40`}>
         <h1 className="text-white text-4xl md:text-6xl font-bold">{t.title}</h1>
         <p className="text-white text-lg md:text-2xl mt-4">{t.subtitle}</p>
-        <div className="mt-8">
-          {!isFormVisible && (
+        <div className="w-full mt-8">
+          {!isFormVisible && !clubInfo && (
             <button onClick={() => setIsFormVisible(true)} className="px-6 py-2 bg-blue-500 text-white rounded">{t.addClub}</button>
           )}
+          {clubInfo && (
+            <div className="bg-white p-4 shadow-lg">
+              <h2 className="text-xl font-bold mb-2">{clubInfo.clubName}</h2>
+              <ul>
+                <li className="text-gray-700">{t.cameras}: 1</li>
+                <li className="text-gray-700">Address: {localStorage.getItem('to')}</li>
+                <li className="text-gray-700">{t.funds}: {(dai / 10 ** 18).toFixed(2)} DAI</li>
+                <li className="text-gray-700">{t.remainingTime}: {(dai / 10 ** 18 * 1.5).toFixed(2)} {t.days}</li>
+              </ul>
+              <button onClick={handleAddFunds} className="mt-4 px-4 py-2 bg-green-500 text-white rounded">{t.addFunds}</button>
+              <button onClick={handleRefresh} className="ml-2 mt-4 px-4 py-2 bg-blue-500 text-white rounded">{t.refreshFunds}</button>
+            </div>
+          )}
         </div>
+        {isWidgetVisible && <ol className="bg-white w-full">
+            <li>1. Choose any token on any chain to send</li>
+            <li>{"2. Don't change the receiver token on chain (DAI on Optimism)"}</li>
+            <li>{`3. Set the "to address" as ${localStorage.getItem('to')}`}</li>
+      </ol>}
       </div>
+
 
       {isFormVisible && (
         <div className="absolute z-20 top-1/4 w-3/4 bg-white p-6 rounded-lg shadow-lg">
@@ -120,7 +224,7 @@ export default function Dashboard() {
       )}
 
       {isWidgetVisible && (
-        <div className="flex justify-center">
+        <div className="mt-5 flex justify-center">
           <SquidWidget
             config={{
               companyName: "Squid Widget",
